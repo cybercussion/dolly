@@ -8,3 +8,11 @@ build/
 config.yaml
 blink.json
 /snapshots/
+
+# OS junk
+.DS_Store
+Thumbs.db
+Desktop.ini
+._*
+.Spotlight-V100
+.Trashes
