@@ -2,6 +2,7 @@
 
 ![One man can make a difference](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlIZB_E6c6W8PU0PVNfkGbUtxsKyrLC_Fv3g&s)
 
+In a dangerous world, where in 2026 I have to stare at a event with no image on my watch, I decided to do something about it.
 
 Python daemon that monitors Blink and Wyze cameras for motion events and pushes rich image notifications to Android via [ntfy](https://ntfy.sh) — optimized for Samsung Galaxy Watch Ultra (BigPictureStyle).
 
@@ -41,7 +42,7 @@ source .venv/bin/activate && python tests/auth.py
 
 ## Test Notifications
 
-Subscribe to your ntfy topic on your phone first, then:
+Install [ntfy](https://play.google.com/store/apps/details?id=io.heckel.ntfy) from the Play Store and subscribe to your topic (must match `ntfy.topic` in `config.yaml`). Then:
 
 ```bash
 source .venv/bin/activate && python tests/notify.py
@@ -54,6 +55,25 @@ source .venv/bin/activate && python run.py
 ```
 
 Polls cameras every 10s, detects new motion clips, extracts a frame from the clip, and pushes it to ntfy. Ctrl-C to stop.
+
+## Install as macOS Service
+
+Runs as a launchd agent — auto-starts on login, restarts on crash.
+
+```bash
+cp com.cybercussion.dolly.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.cybercussion.dolly.plist
+```
+
+Manage:
+
+```bash
+launchctl list | grep dolly                                          # status
+launchctl unload ~/Library/LaunchAgents/com.cybercussion.dolly.plist # stop
+launchctl load ~/Library/LaunchAgents/com.cybercussion.dolly.plist   # start
+```
+
+Logs: `dolly.log` in the project directory.
 
 ## Project Structure
 
