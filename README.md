@@ -4,6 +4,8 @@
 
 In a dangerous world, where in 2026 I have to stare at a event with no image on my watch, I decided to do something about it.
 
+![Wear OS notification](docs/img/wearOS.png)
+
 Python daemon that monitors Blink and Wyze cameras for motion events and pushes rich image notifications to Android via [ntfy](https://ntfy.sh) — optimized for Samsung Galaxy Watch Ultra (BigPictureStyle).
 
 ## Setup
