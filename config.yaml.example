@@ -1,0 +1,18 @@
+cameras:
+  - source: blink
+    username: "you@example.com"
+    password: "your-blink-password"
+
+  - source: wyze
+    email: "you@example.com"
+    password: "your-wyze-password"
+    key_id: ""
+    api_key: ""
+
+ntfy:
+  url: "https://ntfy.sh"
+  topic: "dolly-cams"
+
+daemon:
+  poll_interval: 30
+  snapshot_dir: "/tmp/dolly_snapshots"
