@@ -2,6 +2,7 @@
 
 import json
 import logging
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -39,6 +40,11 @@ class BlinkSource(CameraSource):
         try:
             result = await blink.start()
         except BlinkTwoFARequiredError:
+            if not sys.stdin.isatty():
+                raise RuntimeError(
+                    "Blink 2FA required but running headless. "
+                    "Run 'python run.py' manually to complete 2FA."
+                )
             code = input("Enter Blink 2FA code: ")
             result = await blink.send_2fa_code(code)
 

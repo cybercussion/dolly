@@ -77,6 +77,8 @@ launchctl load ~/Library/LaunchAgents/com.cybercussion.dolly.plist   # start
 
 Logs: `dolly.log` in the project directory.
 
+**Note:** Run `python run.py` manually first to complete Blink 2FA. The cached token in `blink.json` is used for headless operation. If the token expires, check `dolly.log` — you'll need to run manually again to re-authenticate.
+
 ## Project Structure
 
 ```

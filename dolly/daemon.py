@@ -29,7 +29,12 @@ class Dolly:
     async def start(self) -> None:
         """Authenticate all sources and start the poll loop."""
         for source in self._sources:
-            await source.authenticate()
+            try:
+                await source.authenticate()
+            except RuntimeError as e:
+                _LOGGER.error("%s — waiting 5 minutes before retry", e)
+                await asyncio.sleep(300)
+                raise
 
         self._running = True
         _LOGGER.info(
