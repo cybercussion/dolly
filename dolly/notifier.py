@@ -25,6 +25,7 @@ class NtfyNotifier:
         message: str,
         image_path: Path | None = None,
         priority: str = "high",
+        tags: str | None = None,
     ) -> bool:
         """Push a notification to ntfy, optionally with an image attachment.
 
@@ -38,6 +39,9 @@ class NtfyNotifier:
             "Title": title,
             "Priority": priority,
         }
+        
+        if tags:
+            headers["Tags"] = tags
 
         headers["Message"] = message
 

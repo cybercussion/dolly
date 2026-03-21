@@ -3,6 +3,14 @@ cameras:
     username: "you@example.com"
     password: "your-blink-password"
 
+  # Tuya-based cameras (ieGeek, Ctronics, etc.)
+  # Get credentials at https://iot.tuya.com → Cloud Project
+  - source: tuya
+    access_id: "your-access-id"
+    access_secret: "your-access-secret"
+    region: "us"            # us | eu | cn | in
+    # device_ids: []        # optional — omit to auto-discover all cameras
+
   - source: wyze
     email: "you@example.com"
     password: "your-wyze-password"

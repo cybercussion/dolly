@@ -25,6 +25,7 @@ class Dolly:
         self._poll_interval = poll_interval
         self._snapshot_dir = Path(snapshot_dir)
         self._running = False
+        self._stopped = False
 
     async def start(self) -> None:
         """Authenticate all sources and start the poll loop."""
@@ -51,11 +52,17 @@ class Dolly:
             await asyncio.sleep(self._poll_interval)
 
     async def stop(self) -> None:
-        """Shut down gracefully."""
+        """Shut down gracefully (safe to call more than once)."""
+        if self._stopped:
+            return
+        self._stopped = True
         _LOGGER.info("Shutting down...")
         self._running = False
         for source in self._sources:
-            await source.close()
+            try:
+                await source.close()
+            except Exception:
+                _LOGGER.exception("Error closing %s", type(source).__name__)
         await self._notifier.close()
 
     async def _poll(self) -> None:

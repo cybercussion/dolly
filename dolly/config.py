@@ -6,6 +6,7 @@ import yaml
 
 from dolly.cameras.base import CameraSource
 from dolly.cameras.blink import BlinkSource
+from dolly.cameras.tuya import TuyaSource
 from dolly.cameras.wyze import WyzeSource
 
 DEFAULT_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config.yaml"
@@ -33,6 +34,13 @@ def build_sources(cfg: dict) -> list[CameraSource]:
         kind = entry["source"]
         if kind == "blink":
             sources.append(BlinkSource(entry["username"], entry["password"]))
+        elif kind == "tuya":
+            sources.append(TuyaSource(
+                access_id=entry["access_id"],
+                access_secret=entry["access_secret"],
+                region=entry.get("region", "us"),
+                device_ids=entry.get("device_ids"),
+            ))
         elif kind == "wyze":
             sources.append(WyzeSource(
                 email=entry["email"],

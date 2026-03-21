@@ -6,7 +6,7 @@ In a dangerous world, where in 2026 I have to stare at a event with no image on 
 
 ![Wear OS notification](docs/img/wearOS.png)
 
-Python daemon that monitors Blink and Wyze cameras for motion events and pushes rich image notifications to Android via [ntfy](https://ntfy.sh) — optimized for Samsung Galaxy Watch Ultra (BigPictureStyle).
+Python daemon that monitors Blink, Wyze, and Tuya-based cameras (ieGeek, Ctronics, etc.) for motion events and pushes rich image notifications to Android via [ntfy](https://ntfy.sh) — optimized for Samsung Galaxy Watch Ultra (BigPictureStyle).
 
 ## Setup
 
@@ -22,6 +22,39 @@ Edit `config.yaml` with your camera credentials and ntfy topic.
 ### Blink
 
 On first run you'll be prompted for a 2FA code sent to your email/phone. Credentials are cached in `blink.json` for subsequent runs.
+
+### Tuya (ieGeek, Ctronics, and other white-label brands)
+
+Many budget camera brands are white-label Tuya devices. If your camera's app connects to Smart Life or uses a Tuya-based cloud, this is the integration for you.
+
+1. Create a free account at the [Tuya IoT Platform](https://iot.tuya.com)
+2. Create a **Cloud Project**:
+   - Go to Cloud > Development > Create Cloud Project
+   - Select your data center (Western America for US, Central Europe for EU)
+   - Under **Service API**, subscribe to: **IoT Core**, **Smart Home Device Management**, and **Device Log Query**
+3. Get your **Access ID** and **Access Secret** from the project overview page
+4. Link your camera app account:
+   - In the Cloud Project, go to **Devices** > **Link Tuya App Account**
+   - Open the Smart Life app (or your brand's app) > Profile > scan the QR code shown on the Tuya IoT page
+   - Your devices should now appear under the Devices tab
+5. Choose your region in `config.yaml`:
+   - `us` — `openapi.tuyaus.com` (Americas)
+   - `eu` — `openapi.tuyaeu.com` (Europe)
+   - `cn` — `openapi.tuyacn.com` (China)
+   - `in` — `openapi.tuyain.com` (India)
+6. Add your credentials to `config.yaml`:
+   ```yaml
+   - source: tuya
+     access_id: "your-access-id"
+     access_secret: "your-access-secret"
+     region: "us"
+   ```
+7. (Optional) To monitor specific cameras only, add `device_ids` — find IDs on the Tuya IoT Devices page:
+   ```yaml
+     device_ids:
+       - "bf63..."
+       - "eb04..."
+   ```
 
 ### Wyze
 
@@ -42,9 +75,19 @@ Wyze requires an API key pair and email/password authentication.
 source .venv/bin/activate && python tests/auth.py
 ```
 
+## Notifications (ntfy)
+
+Dolly uses [ntfy](https://ntfy.sh) to push notifications to your phone/watch. It's free, open source, and requires no account.
+
+1. Install the app: [Android (Play Store)](https://play.google.com/store/apps/details?id=io.heckel.ntfy) · [iOS (App Store)](https://apps.apple.com/us/app/ntfy/id1625396347)
+2. Subscribe to a topic — **pick something unique and hard to guess**. ntfy topics are public by default, so anyone who knows the name can read your alerts. Use something like `dolly-cam-a7f3x9` not `dolly-cams`.
+3. Set the same topic in `config.yaml` under `ntfy.topic`
+
+If you'd rather self-host or want private topics, ntfy supports [self-hosting](https://docs.ntfy.sh/install/) and [access control](https://docs.ntfy.sh/config/#access-control). Alternatives to ntfy include [Pushover](https://pushover.net) (paid, private by default) and [Gotify](https://gotify.net) (self-hosted) — those would require swapping out `dolly/notifier.py`.
+
 ## Test Notifications
 
-Install [ntfy](https://play.google.com/store/apps/details?id=io.heckel.ntfy) from the Play Store and subscribe to your topic (must match `ntfy.topic` in `config.yaml`). Then:
+Send a test notification to verify your setup:
 
 ```bash
 source .venv/bin/activate && python tests/notify.py
@@ -95,6 +138,7 @@ Logs: `dolly.log` in the project directory.
     └── cameras/
         ├── base.py            # CameraSource ABC + CameraInfo dataclass
         ├── blink.py           # Blink integration (blinkpy)
+        ├── tuya.py            # Tuya integration (ieGeek, Ctronics, etc.)
         └── wyze.py            # Wyze integration (wyze-sdk)
 ```
 

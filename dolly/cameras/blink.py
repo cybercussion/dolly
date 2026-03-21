@@ -105,7 +105,7 @@ class BlinkSource(CameraSource):
             if entry.get("deleted", False):
                 continue
 
-            name = entry.get("device_name", "")
+            name = entry.get("device_name", "").strip()
             created = entry.get("created_at", "")
             clip_url = entry.get("media", "")
             event_key = f"{name}:{created}"

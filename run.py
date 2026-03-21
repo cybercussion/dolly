@@ -43,7 +43,10 @@ async def main(config_path: Path | None = None) -> None:
     loop = asyncio.get_running_loop()
     setup_signal_handlers(daemon, loop)
 
-    await daemon.start()
+    try:
+        await daemon.start()
+    finally:
+        await daemon.stop()
 
 
 if __name__ == "__main__":
