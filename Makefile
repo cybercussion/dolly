@@ -2,7 +2,7 @@ PLIST  := com.cybercussion.dolly
 PLIST_SRC := $(CURDIR)/$(PLIST).plist
 PLIST_DST := $(HOME)/Library/LaunchAgents/$(PLIST).plist
 
-.PHONY: install uninstall start stop restart status logs tail
+.PHONY: install uninstall start stop restart status logs tail run
 
 install:
 	ln -sf $(PLIST_SRC) $(PLIST_DST)
@@ -24,6 +24,9 @@ restart: stop start
 
 status:
 	@launchctl list | grep $(PLIST) || echo "Not running."
+
+run:
+	$(CURDIR)/.venv/bin/python $(CURDIR)/run.py
 
 logs:
 	@cat dolly.log
