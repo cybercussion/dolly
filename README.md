@@ -96,6 +96,12 @@ source .venv/bin/activate && python tests/notify.py
 ## Run the Daemon
 
 ```bash
+make run
+```
+
+Or manually:
+
+```bash
 source .venv/bin/activate && python run.py
 ```
 
@@ -113,6 +119,7 @@ make start     # load the daemon
 Manage:
 
 ```bash
+make run       # run directly in the foreground
 make start     # start the daemon
 make stop      # stop the daemon
 make restart   # stop + start
