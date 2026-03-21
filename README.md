@@ -106,16 +106,20 @@ Polls cameras every 10s, detects new motion clips, extracts a frame from the cli
 Runs as a launchd agent — auto-starts on login, restarts on crash.
 
 ```bash
-cp com.cybercussion.dolly.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.cybercussion.dolly.plist
+make install   # symlinks the plist into ~/Library/LaunchAgents/
+make start     # load the daemon
 ```
 
 Manage:
 
 ```bash
-launchctl list | grep dolly                                          # status
-launchctl unload ~/Library/LaunchAgents/com.cybercussion.dolly.plist # stop
-launchctl load ~/Library/LaunchAgents/com.cybercussion.dolly.plist   # start
+make start     # start the daemon
+make stop      # stop the daemon
+make restart   # stop + start
+make status    # check if running
+make tail      # follow the log
+make logs      # dump the full log
+make uninstall # stop and remove the plist
 ```
 
 Logs: `dolly.log` in the project directory.
