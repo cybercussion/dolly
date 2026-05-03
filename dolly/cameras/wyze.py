@@ -7,6 +7,7 @@ from pathlib import Path
 
 import aiohttp
 from wyze_sdk import Client as WyzeClient
+from wyze_sdk.errors import WyzeApiError
 from wyze_sdk.models.events import EventAlarmType
 
 from dolly.cameras.base import CameraSource, CameraInfo, MotionEvent
@@ -43,12 +44,29 @@ class WyzeSource(CameraSource):
 
         self._last_check = datetime.now(tz=timezone.utc)
 
+    async def _reauth(self) -> None:
+        """Re-authenticate to get a fresh access token."""
+        _LOGGER.info("Wyze token expired — re-authenticating")
+        await self.authenticate()
+
     async def refresh(self) -> None:
         pass
 
+    async def _list_devices(self) -> list:
+        """Fetch device list from Wyze API."""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, self._client.devices_list)
+
     async def list_cameras(self) -> list[CameraInfo]:
         assert self._client, "Call authenticate() first"
-        devices = self._client.devices_list()
+        try:
+            devices = await self._list_devices()
+        except WyzeApiError as exc:
+            if "expired" in str(exc).lower() or "2001" in str(exc):
+                await self._reauth()
+                devices = await self._list_devices()
+            else:
+                raise
         return [
             CameraInfo(
                 name=d.nickname,
@@ -61,22 +79,37 @@ class WyzeSource(CameraSource):
             if d.type == "Camera"
         ]
 
+    async def _fetch_events(self) -> list:
+        """Fetch raw events from Wyze API."""
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None,
+            lambda: self._client.events.list(
+                device_ids=list(self._mac_to_name.keys()),
+                event_values=[EventAlarmType.MOTION],
+                begin=self._last_check,
+                end=datetime.now(tz=timezone.utc),
+                limit=20,
+                order_by=2,
+            ),
+        )
+
     async def get_new_events(self) -> list[MotionEvent]:
         assert self._client, "Call authenticate() first"
 
         try:
-            loop = asyncio.get_running_loop()
-            raw_events = await loop.run_in_executor(
-                None,
-                lambda: self._client.events.list(
-                    device_ids=list(self._mac_to_name.keys()),
-                    event_values=[EventAlarmType.MOTION],
-                    begin=self._last_check,
-                    end=datetime.now(tz=timezone.utc),
-                    limit=20,
-                    order_by=2,
-                ),
-            )
+            raw_events = await self._fetch_events()
+        except WyzeApiError as exc:
+            if "expired" in str(exc).lower() or "2001" in str(exc):
+                await self._reauth()
+                try:
+                    raw_events = await self._fetch_events()
+                except Exception:
+                    _LOGGER.exception("Wyze retry failed after re-auth")
+                    return []
+            else:
+                _LOGGER.exception("Wyze API error")
+                return []
         except Exception:
             _LOGGER.exception("Failed to fetch Wyze events")
             return []
